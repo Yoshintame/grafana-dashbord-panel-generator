@@ -1,0 +1,334 @@
+{
+	"datasource": {
+	  "type": "marcusolsson-json-datasource",
+	  "uid": "EHglzsKVk"
+	},
+	"fieldConfig": {
+	  "defaults": {
+		"custom": {
+		  "lineWidth": 1,
+		  "fillOpacity": 96,
+		  "gradientMode": "none",
+		  "axisPlacement": "auto",
+		  "axisLabel": "",
+		  "axisColorMode": "text",
+		  "scaleDistribution": {
+			"type": "linear"
+		  },
+		  "axisCenteredZero": false,
+		  "hideFrom": {
+			"tooltip": false,
+			"viz": false,
+			"legend": false
+		  },
+		  "thresholdsStyle": {
+			"mode": "off"
+		  }
+		},
+		"color": {
+		  "mode": "palette-classic"
+		},
+		"mappings": [],
+		"thresholds": {
+		  "mode": "absolute",
+		  "steps": [
+			{
+			  "color": "green",
+			  "value": null
+			},
+			{
+			  "color": "red",
+			  "value": 80
+			}
+		  ]
+		},
+		"unit": "bps"
+	  },
+	  "overrides": [
+		{
+		  "matcher": {
+			"id": "byName",
+			"options": "2"
+		  },
+		  "properties": [
+			{
+			  "id": "color",
+			  "value": {
+				"fixedColor": "#b6d14a",
+				"mode": "fixed"
+			  }
+			}
+		  ]
+		},
+		{
+		  "matcher": {
+			"id": "byName",
+			"options": "1"
+		  },
+		  "properties": [
+			{
+			  "id": "color",
+			  "value": {
+				"fixedColor": "#a4c445",
+				"mode": "fixed"
+			  }
+			}
+		  ]
+		},
+		{
+		  "matcher": {
+			"id": "byName",
+			"options": "-1"
+		  },
+		  "properties": [
+			{
+			  "id": "color",
+			  "value": {
+				"fixedColor": "#a0a0e5",
+				"mode": "fixed"
+			  }
+			}
+		  ]
+		},
+		{
+		  "matcher": {
+			"id": "byName",
+			"options": "-2"
+		  },
+		  "properties": [
+			{
+			  "id": "color",
+			  "value": {
+				"fixedColor": "#8787c6",
+				"mode": "fixed"
+			  }
+			}
+		  ]
+		}
+	  ]
+	},
+	"gridPos": {
+	  "h": 11,
+	  "w": 8,
+	  "x": 8,
+	  "y": 24
+	},
+	"id": 19,
+	"options": {
+	  "orientation": "auto",
+	  "xTickLabelRotation": 0,
+	  "xTickLabelSpacing": 100,
+	  "showValue": "always",
+	  "stacking": "normal",
+	  "groupWidth": 0.7,
+	  "barWidth": 1,
+	  "barRadius": 0.15,
+	  "fullHighlight": false,
+	  "tooltip": {
+		"mode": "multi",
+		"sort": "none"
+	  },
+	  "legend": {
+		"showLegend": false,
+		"displayMode": "list",
+		"placement": "bottom",
+		"calcs": []
+	  }
+	},
+	"targets": [
+	  {
+		"cacheDurationSeconds": 300,
+		"datasource": {
+		  "type": "marcusolsson-json-datasource",
+		  "uid": "EHglzsKVk"
+		},
+		"fields": [
+		  {
+			"jsonPath": "$.data.*.0",
+			"name": "Time",
+			"type": "time"
+		  },
+		  {
+			"jsonPath": "$.data.*.1",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.2",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.3",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.4",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.5",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.6",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.7",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.8",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.9",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.10",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.11",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.12",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.13",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.14",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.15",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.16",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.17",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.18",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.19",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.20",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.21",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.22",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.23",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.24",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.25",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.26",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.27",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  },
+		  {
+			"jsonPath": "$.data.*.28",
+			"language": "jsonpath",
+			"name": "",
+			"type": "number"
+		  }
+		],
+		"method": "POST",
+		"params": [
+		  [
+			"url",
+			"https://mon.reconn.local/graph.php?type=multi-port_bits_separate&id=74881,31403,75384,66914,1974,1985,30122,1994,2006,47979,1979,77308,31424,78697&legend=yes&format=jsontime"
+		  ]
+		],
+		"queryParams": "",
+		"refId": "A",
+		"urlPath": "/mon?from=$__unixEpochFrom()&to=$__unixEpochTo()"
+	  }
+	],
+	"title": "Все внешние каналы (NEW)",
+	"type": "barchart"
+  }

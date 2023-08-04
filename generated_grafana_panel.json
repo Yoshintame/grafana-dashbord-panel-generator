@@ -1,0 +1,267 @@
+{
+    "datasource": {
+        "uid": "EHglzsKVk",
+        "type": "marcusolsson-json-datasource"
+    },
+    "fieldConfig": {
+        "defaults": {
+            "custom": {
+                "lineWidth": 1,
+                "fillOpacity": 95,
+                "gradientMode": "none",
+                "axisPlacement": "auto",
+                "axisLabel": "",
+                "axisColorMode": "text",
+                "scaleDistribution": {
+                    "type": "linear"
+                },
+                "axisCenteredZero": false,
+                "hideFrom": {
+                    "tooltip": false,
+                    "viz": false,
+                    "legend": false
+                },
+                "thresholdsStyle": {
+                    "mode": "off"
+                }
+            },
+            "color": {
+                "mode": "palette-classic"
+            },
+            "mappings": [],
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                    {
+                        "color": "green",
+                        "value": null
+                    },
+                    {
+                        "color": "red",
+                        "value": 80
+                    }
+                ]
+            },
+            "unit": "bps"
+        },
+        "overrides": [
+            {
+                "matcher": {
+                    "id": "byName",
+                    "options": "out_m9-f0-n39-hw2487 - Et1/9"
+                },
+                "properties": [
+                    {
+                        "id": "color",
+                        "value": {
+                            "fixedColor": "#FCB83E",
+                            "mode": "fixed"
+                        }
+                    }
+                ]
+            },
+            {
+                "matcher": {
+                    "id": "byName",
+                    "options": "out_m9-f7-n3-2_ip242_middle - Et1/11"
+                },
+                "properties": [
+                    {
+                        "id": "color",
+                        "value": {
+                            "fixedColor": "#FAAC38",
+                            "mode": "fixed"
+                        }
+                    }
+                ]
+            },
+            {
+                "matcher": {
+                    "id": "byName",
+                    "options": "in_m9-f0-n39-hw2487 - Et1/9"
+                },
+                "properties": [
+                    {
+                        "id": "color",
+                        "value": {
+                            "fixedColor": "#A0A0E5",
+                            "mode": "fixed"
+                        }
+                    }
+                ]
+            },
+            {
+                "matcher": {
+                    "id": "byName",
+                    "options": "in_m9-f7-n3-2_ip242_middle - Et1/11"
+                },
+                "properties": [
+                    {
+                        "id": "color",
+                        "value": {
+                            "fixedColor": "#9E94DF",
+                            "mode": "fixed"
+                        }
+                    }
+                ]
+            },
+            {
+                "matcher": {
+                    "id": "byName",
+                    "options": "Total in"
+                },
+                "properties": [
+                    {
+                        "id": "custom.lineWidth",
+                        "value": 0
+                    },
+                    {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                    },
+                    {
+                        "id": "custom.scaleDistribution",
+                        "value": {
+                            "log": 2,
+                            "type": "log"
+                        }
+                    }
+                ]
+            },
+            {
+                "matcher": {
+                    "id": "byName",
+                    "options": "Total out"
+                },
+                "properties": [
+                    {
+                        "id": "custom.lineWidth",
+                        "value": 0
+                    },
+                    {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                    },
+                    {
+                        "id": "custom.scaleDistribution",
+                        "value": {
+                            "log": 2,
+                            "type": "log"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 9
+    },
+    "id": 39,
+    "options": {
+        "orientation": "auto",
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 100,
+        "showValue": "always",
+        "stacking": "normal",
+        "groupWidth": 0.7,
+        "barWidth": 1,
+        "barRadius": 0,
+        "fullHighlight": false,
+        "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+        },
+        "legend": {
+            "showLegend": false,
+            "displayMode": "list",
+            "placement": "bottom",
+            "calcs": []
+        }
+    },
+    "targets": [
+        {
+            "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "EHglzsKVk"
+            },
+            "cacheDurationSeconds": 300,
+            "fields": [
+                {
+                    "jsonPath": "$.data.*.0",
+                    "name": "Time",
+                    "type": "time"
+                },
+                {
+                    "jsonPath": "$.data.*.1",
+                    "language": "jsonpath",
+                    "name": "in_m9-f0-n39-hw2487 - Et1/9",
+                    "type": "number"
+                },
+                {
+                    "jsonPath": "$.data.*.2",
+                    "language": "jsonpath",
+                    "name": "in_m9-f7-n3-2_ip242_middle - Et1/11",
+                    "type": "number"
+                },
+                {
+                    "jsonPath": "$.data.*.3",
+                    "language": "jsonpath",
+                    "name": "out_m9-f0-n39-hw2487 - Et1/9",
+                    "type": "number"
+                },
+                {
+                    "jsonPath": "$.data.*.4",
+                    "language": "jsonpath",
+                    "name": "out_m9-f7-n3-2_ip242_middle - Et1/11",
+                    "type": "number"
+                }
+            ],
+            "method": "POST",
+            "params": [
+                [
+                    "url",
+                    "https://mon.reconn.local/graph.php?type=multi-port_upkts&id=74881,31403,75384,66914,1974,1985,30122,1994,2006,47979,1979,77308,31424,78697&legend=yes&format=jsontime"
+                ]
+            ],
+            "queryParams": "",
+            "refId": "A",
+            "urlPath": "/mon?from=$__unixEpochFrom()&to=$__unixEpochTo()"
+        }
+    ],
+    "title": "\u0412\u0441\u0435 \u0432\u043d\u0435\u0448\u043d\u0438\u0435 \u043a\u0430\u043d\u0430\u043b\u044b",
+    "transformations": [
+        {
+            "id": "calculateField",
+            "options": {
+                "alias": "Total out",
+                "mode": "reduceRow",
+                "reduce": {
+                    "include": [
+                        "out_m9-f0-n39-hw2487 - Et1/9",
+                        "out_m9-f7-n3-2_ip242_middle - Et1/11"
+                    ],
+                    "reducer": "sum"
+                }
+            }
+        },
+        {
+            "id": "calculateField",
+            "options": {
+                "alias": "Total in",
+                "mode": "reduceRow",
+                "reduce": {
+                    "include": [
+                        "in_m9-f0-n39-hw2487 - Et1/9",
+                        "in_m9-f7-n3-2_ip242_middle - Et1/11"
+                    ],
+                    "reducer": "sum"
+                }
+            }
+        }
+    ],
+    "type": "barchart",
+    "description": ""
+}
