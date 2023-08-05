@@ -1,4 +1,4 @@
-from pprint import pprint 
+from pprint import pprint
 import requests
 import json
 
@@ -74,8 +74,6 @@ headers = {
 }
 
 
-
-
 def get_legend(ids):
     legend = []
     for id in ids:
@@ -95,11 +93,11 @@ def get_legend(ids):
 
     in_legend = []
     out_legend = []
-    for field in legend: 
+    for field in legend:
         in_legend.append(f"out_{field}")
         out_legend.append(f"in_{field}")
 
-   
+
 
     return in_legend, out_legend
 
@@ -113,11 +111,10 @@ def generate_overrides(color_in, color_out, in_legend, out_legend):
     for field  in out_legend:
         overrides.append(generate_override(color_out["initial_color"], color_out["steps"], field))
 
-    # Total overrides 
+    # Total overrides
     overrides.append(generate_total_override("Total in"))
     overrides.append(generate_total_override("Total out"))
-    
-    
+
     return overrides
 
 def generate_total_transformation(total_name, legend):
@@ -166,10 +163,10 @@ def generate_total_override(total_name):
         }
         ]
     }
-    
+
     return total_override
 
-    
+
 def generate_override(color, steps, field):
     matcher = {
             "id": "byName",
@@ -183,7 +180,7 @@ def generate_override(color, steps, field):
             "mode": "fixed"
         }
     })
-        
+
 
     override = {
         "matcher": matcher,
@@ -212,12 +209,10 @@ def generate_fields(legend):
 
         fields.append(field)
 
-   
-
     return fields
 
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
     in_legend, out_legend = get_legend(PORT_IDS)
 
     overrides = generate_overrides(COLOR_ORANGE, COLOR_PURPLE, in_legend, out_legend)
@@ -225,11 +220,9 @@ if __name__ == "__main__":
     transformations = generate_total_transformations("Total out", "Total in", in_legend, out_legend)
 
     legend =  out_legend + in_legend
-    pprint(legend)
-
     fields = generate_fields(legend)
 
-    
+
     with open("generated_fields.json", "w") as outfile:
         json_object = json.dumps({"fields": fields}, indent=4)
         outfile.write(json_object)
@@ -254,4 +247,4 @@ if __name__ == "__main__":
 
 
 
-        
+
