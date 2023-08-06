@@ -1,10 +1,8 @@
 from urllib.parse import urlparse, parse_qs
 import requests
 import json
-from pprint import pprint
 
-GRAFANA_URL = "https://eye.reconn.ru/d/JkuONx-Vk1/dc-2?orgId=1&refresh=1m&viewPanel=21"
-
+from src.consts import GRAFANA_API_TOKEN, GRAFANA_API_BASE_URL
 
 # Get viewPanel and dashboard ids from panel url
 def get_ids_from_url(URL):
@@ -21,8 +19,13 @@ def get_ids_from_url(URL):
 
 # Get dashboard from grafana api by its id
 def get_databoard_from_api(dash_uid):
-    headers = {"Authorization": "Bearer eyJrIjoiY05qUVNwUGd0b0NFQnUydG9GSUR2bkk0dnRETlZhVlAiLCJuIjoiZGFzaGdlbiIsImlkIjoxfQ=="}
-    url = f"https://eye.reconn.ru/api/dashboards/uid/{dash_uid}"
+    print()
+    print(GRAFANA_API_TOKEN)
+    print(GRAFANA_API_BASE_URL)
+    print()
+
+    headers = {"Authorization": f"Bearer {GRAFANA_API_TOKEN}"}
+    url = f"{GRAFANA_API_BASE_URL}/dashboards/uid/{dash_uid}"
 
     response = requests.request("GET", url, headers=headers)
     data = json.loads(response.text)
@@ -32,7 +35,6 @@ def get_databoard_from_api(dash_uid):
 def get_panel_from_dashboard(dashboard_data, viewPanel_uid):
     found_panel = None
     for panel in dashboard_data["dashboard"]["panels"]:
-        print(panel["id"])
         if int(panel["id"]) == int(viewPanel_uid):
             found_panel = panel
             break
@@ -42,21 +44,30 @@ def get_panel_from_dashboard(dashboard_data, viewPanel_uid):
     return found_panel
 
 # Gererate config for panel editing
-def generate_config(paneld_data):
+def generate_config(panel_data):
     mon_url = None
-    for param in paneld_data["targets"][0]["params"]:
+    for param in panel_data["targets"][0]["params"]:
         if "graph.php" in param[1]:
             mon_url = param[1]
             break
-
+    print(mon_url)
     port_ids = search_ids_in_mon_url(mon_url)
 
-
-    fields = paneld_data["targets"][0]["fields"]
-    config = []
+    fields = panel_data["targets"][0]["fields"]
+    config_fields = []
     for index, port_id in enumerate(port_ids):
-        field_name = fields[index+1]["name"] if (int(fields[index+1]["jsonPath"].split('.')[-1]) == index+1) else "-"
-        config.append({"id": port_id, "label": field_name})
+        field_name = fields[index+1]["name"].split("_", maxsplit=1)[1] if (int(fields[index+1]["jsonPath"].split('.')[-1]) == index+1) else None
+
+        config_fields.append({"id": int(port_id), "label": field_name})
+
+    config = {
+        "panel_file": f'initial-panel-data-{panel_data["datasource"]["uid"]}.json',
+        "colors": {
+            "in": "GREEN",
+            "out": "BLUE"
+        },
+        "fields": config_fields
+    }
 
     return config
 
@@ -73,15 +84,16 @@ def search_ids_in_mon_url(url):
     return id_list
 
 
-if __name__ == "__main__":
-    dash_uid, viewPanel_uid = get_ids_from_url(GRAFANA_URL)
+def config(grafana_url):
+    dash_uid, viewPanel_uid = get_ids_from_url(grafana_url)
     dashboard_data = get_databoard_from_api(dash_uid)
 
     panel_data = get_panel_from_dashboard(dashboard_data, viewPanel_uid)
-    with open(f'initial-panel-data-{panel_data["datasource"]["uid"]}.json', 'w') as file:
+    config = generate_config(panel_data)
+
+    with open(config["panel_file"], 'w') as file:
         json.dump(panel_data, file, indent=4)
 
-    config = generate_config(panel_data)
     with open(f'config.json', 'w') as file:
         json.dump(config, file, indent=4)
 
