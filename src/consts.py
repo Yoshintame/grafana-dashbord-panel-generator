@@ -1,5 +1,6 @@
 import os
 
+
 def load_env(path):
     with open(path, 'r') as file:
         lines = file.readlines()

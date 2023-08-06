@@ -1,25 +1,30 @@
-from pprint import pprint
-import requests
 import json
+import warnings
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
+import requests
+from urllib3.exceptions import InsecureRequestWarning
+
+from src.color import COLORS
 from src.consts import MON_BASE_URL, MON_AUTH
-from src.color import Color, COLORS
+
+# Completely disable InsecureRequestWarning
+warnings.filterwarnings("ignore", category=InsecureRequestWarning)
 
 
-def get_label_from_mon_api(id):
-    response = requests.get(f'{MON_BASE_URL}/ports/{id}', verify=False,  auth=MON_AUTH)
+def get_label_from_mon_api(port_id):
+    response = requests.get(f'{MON_BASE_URL}/ports/{port_id}', verify=False, auth=MON_AUTH)
     if response.status_code != 200:
         return "unknown"
 
     port = response.json()['port']
-    portname = response.json()['port']["entity_shortname"]
+    port_name = response.json()['port']["entity_shortname"]
 
-    response = requests.get(f'{MON_BASE_URL}/devices/{port["device_id"]}', verify=False,  auth=MON_AUTH)
+    response = requests.get(f'{MON_BASE_URL}/devices/{port["device_id"]}', verify=False, auth=MON_AUTH)
 
-    devicename = "unknown_device" if response.status_code != 200 else response.json()['device']["hostname"]
+    device_name = "unknown_device" if response.status_code != 200 else response.json()['device']["hostname"]
 
-    return f"{devicename} - {portname}"
+    return f"{device_name} - {port_name}"
 
 
 def parse_config(config_path):
@@ -29,8 +34,8 @@ def parse_config(config_path):
         colors = config["colors"]
         panel_file = config["panel_file"]
 
-
     return in_legend, out_legend, colors, port_ids, panel_file
+
 
 def get_legend_from_config_fields(config_fields):
     in_legend = []
@@ -44,7 +49,7 @@ def get_legend_from_config_fields(config_fields):
 
         port_ids.append(field["id"])
 
-        if field["label"] == None:
+        if field["label"] is None:
             field["label"] = get_label_from_mon_api(field["id"])
 
         in_legend.append(f'out_{field["label"]}')
@@ -57,9 +62,9 @@ def generate_overrides(color_in, color_out, in_legend, out_legend):
     overrides = []
 
     # Color overrides
-    for field  in in_legend:
+    for field in in_legend:
         overrides.append(generate_override(color_in["initial_color"], color_in["steps"], field))
-    for field  in out_legend:
+    for field in out_legend:
         overrides.append(generate_override(color_out["initial_color"], color_out["steps"], field))
 
     # Total overrides
@@ -68,6 +73,7 @@ def generate_overrides(color_in, color_out, in_legend, out_legend):
 
     return overrides
 
+
 def generate_total_transformation(total_name, legend):
     total_transformation = {
         "id": "calculateField",
@@ -75,43 +81,44 @@ def generate_total_transformation(total_name, legend):
             "alias": total_name,
             "mode": "reduceRow",
             "reduce": {
-            "include": legend,
-            "reducer": "sum"
+                "include": legend,
+                "reducer": "sum"
             }
         }
     }
 
     return total_transformation
 
+
 def generate_total_transformations(in_total_name, out_total_name, in_legend, out_legend):
-    total_transformations = []
-    total_transformations.append(generate_total_transformation(in_total_name, in_legend))
-    total_transformations.append(generate_total_transformation(out_total_name, out_legend))
+    total_transformations = [generate_total_transformation(in_total_name, in_legend),
+                             generate_total_transformation(out_total_name, out_legend)]
 
     return total_transformations
+
 
 def generate_total_override(total_name):
     total_override = {
         "matcher": {
-        "id": "byName",
-        "options": total_name
+            "id": "byName",
+            "options": total_name
         },
         "properties": [
-        {
-            "id": "custom.lineWidth",
-            "value": 0
-        },
-        {
-            "id": "custom.fillOpacity",
-            "value": 0
-        },
-        {
-            "id": "custom.scaleDistribution",
-            "value": {
-            "log": 2,
-            "type": "log"
+            {
+                "id": "custom.lineWidth",
+                "value": 0
+            },
+            {
+                "id": "custom.fillOpacity",
+                "value": 0
+            },
+            {
+                "id": "custom.scaleDistribution",
+                "value": {
+                    "log": 2,
+                    "type": "log"
+                }
             }
-        }
         ]
     }
 
@@ -120,18 +127,16 @@ def generate_total_override(total_name):
 
 def generate_override(color, steps, field):
     matcher = {
-            "id": "byName",
-            "options": field
-        }
-    properties = []
-    properties.append({
+        "id": "byName",
+        "options": field
+    }
+    properties = [{
         "id": "color",
         "value": {
             "fixedColor": color.rgb_to_hex(),
             "mode": "fixed"
         }
-    })
-
+    }]
 
     override = {
         "matcher": matcher,
@@ -163,13 +168,12 @@ def generate_fields(legend):
     return fields
 
 
-
-def generate_mon_api_url(port_ids, panel):
-    original_url = panel["targets"][0]["params"][0][1]
+def generate_mon_api_url(port_ids, panel_data):
+    original_url = panel_data["targets"][0]["params"][0][1]
     parsed_url = urlparse(original_url)
     params = parse_qs(parsed_url.query)
 
-    params["id"] = ','.join([str(id) for id in port_ids])
+    params["id"] = ','.join([str(port_id) for port_id in port_ids])
     updated_query = urlencode(params, doseq=True)
     updated_url = parsed_url._replace(query=updated_query)
     final_url = urlunparse(updated_url)
@@ -195,10 +199,5 @@ def panel():
         initial_panel["transformations"] = transformations
         initial_panel["targets"][0]["params"][0][1] = target_url
 
-
         json_object = json.dumps(initial_panel, indent=4)
         f.write(json_object)
-
-
-
-

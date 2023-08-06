@@ -1,11 +1,9 @@
-import argparse, textwrap
-import os
-
+import argparse
+import textwrap
 from argparse import RawTextHelpFormatter
 
 from src.config import config
 from src.panel import panel
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -28,7 +26,8 @@ This command will generate a new Grafana panel JSON. Copy the JSON and paste it 
     '''), formatter_class=RawTextHelpFormatter)
     subparsers = parser.add_subparsers(dest='command', required=True)
 
-    config_parser = subparsers.add_parser('config', help='Generate initial panel data file and config file for its editing')
+    config_parser = subparsers.add_parser('config',
+                                          help='Generate initial panel data file and config file for its editing')
     config_parser.add_argument('-u', '--url', help="Grafana panel url", required=True)
 
     panel_parser = subparsers.add_parser('panel', help='Applies the config to the initial panel, generating a new one')
@@ -36,10 +35,6 @@ This command will generate a new Grafana panel JSON. Copy the JSON and paste it 
     args = parser.parse_args()
 
     if args.command == 'config':
-        print('URL:', args.url)
         config(args.url)
-
-
     elif args.command == 'panel':
         panel()
-
