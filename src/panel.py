@@ -1,15 +1,70 @@
 import json
+import sys
 import warnings
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
+from jsonschema import validate
 
 from src.color import COLORS
 from src.consts import MON_BASE_URL, MON_AUTH
 
 # Completely disable InsecureRequestWarning
 warnings.filterwarnings("ignore", category=InsecureRequestWarning)
+
+CONFIG_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "panel_file": {
+            "type": "string",
+            "pattern": ".*\.json$"
+        },
+        "colors": {
+            "type": "object",
+            "properties": {
+                "in": {
+                    "type": "string",
+                    "enum": ["GREEN", "BLUE", "PURPLE", "ORANGE"]
+                },
+                "out": {
+                    "type": "string",
+                    "enum": ["GREEN", "BLUE", "PURPLE", "ORANGE"]
+                }
+            },
+            "required": ["in", "out"]
+        },
+        "fields": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "number"},
+                    "label": {"type": ["string", "null"]}
+                },
+                "required": ["id", "label"]
+            }
+        }
+    },
+    "required": ["panel_file", "colors", "fields"]
+}
+
+
+def load_and_validate_config_file(config_path):
+    try:
+        with open(config_path, 'r') as f:
+            config_data = json.loads(f.read())
+
+            try:
+                validate(config_data, CONFIG_SCHEMA)
+            except Exception as e:
+                print("Not valid config file. Error: ", e)
+                sys.exit(1)
+    except FileNotFoundError:
+        print("File 'config.json' not found.")
+        sys.exit(1)
+
+    return config_data
 
 
 def get_label_from_mon_api(port_id):
@@ -27,12 +82,10 @@ def get_label_from_mon_api(port_id):
     return f"{device_name} - {port_name}"
 
 
-def parse_config(config_path):
-    with open(config_path, 'r') as f:
-        config = json.loads(f.read())
-        in_legend, out_legend, port_ids = get_legend_from_config_fields(config["fields"])
-        colors = config["colors"]
-        panel_file = config["panel_file"]
+def parse_config(config_data):
+    in_legend, out_legend, port_ids = get_legend_from_config_fields(config_data["fields"])
+    colors = config_data["colors"]
+    panel_file = config_data["panel_file"]
 
     return in_legend, out_legend, colors, port_ids, panel_file
 
@@ -42,11 +95,6 @@ def get_legend_from_config_fields(config_fields):
     out_legend = []
     port_ids = []
     for field in config_fields:
-        if "id" not in field:
-            raise Exception("Missing ID field")
-        if not isinstance(field['id'], int):
-            raise Exception("Field ID not integer")
-
         port_ids.append(field["id"])
 
         if field["label"] is None:
@@ -182,7 +230,8 @@ def generate_mon_api_url(port_ids, panel_data):
 
 
 def panel():
-    in_legend, out_legend, colors, port_ids, panel_file = parse_config("config.json")
+    config_data = load_and_validate_config_file("config.json")
+    in_legend, out_legend, colors, port_ids, panel_file = parse_config(config_data)
 
     overrides = generate_overrides(COLORS[colors["out"]], COLORS[colors["in"]], in_legend, out_legend)
     transformations = generate_total_transformations("Total out", "Total in", in_legend, out_legend)
