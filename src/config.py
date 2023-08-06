@@ -1,4 +1,5 @@
 import json
+import sys
 from urllib.parse import urlparse, parse_qs
 
 import requests
@@ -22,21 +23,31 @@ def get_dashboard_from_api(dash_uid):
     headers = {"Authorization": f"Bearer {GRAFANA_API_TOKEN}"}
     url = f"{GRAFANA_API_BASE_URL}/dashboards/uid/{dash_uid}"
 
-    response = requests.request("GET", url, headers=headers)
-    data = json.loads(response.text)
-    return data
+    try:
+        response = requests.request("GET", url, headers=headers)
+        response.raise_for_status()
+
+        data = json.loads(response.text)
+        return data
+    except requests.exceptions.RequestException as e:
+        print("An error occurred while making the request to mon, setting label to 'unknown': ", e)
+        sys.exit(1)
+    except Exception as e:
+        print("An unexpected error occurred while making the request to mon, setting label to 'unknown': ", e)
+        sys.exit(1)
 
 
-# Get panel from dashboard object by its id
+# Get panel object from dashboard object by its id
 def get_panel_from_dashboard(dashboard_data, panel_uid):
     found_panel = None
+
     for panel in dashboard_data["dashboard"]["panels"]:
         if int(panel["id"]) == int(panel_uid):
             found_panel = panel
             break
 
     if found_panel is None:
-        print(f"Panel with id {panel_uid} not found")
+        raise ValueError(f"Not found panel with {panel_uid} id dashboard object")
     return found_panel
 
 
@@ -47,13 +58,13 @@ def generate_config(panel_data):
         if "graph.php" in param[1]:
             mon_url = param[1]
             break
-    port_ids = search_ids_in_mon_url(mon_url)
+    port_ids = search_port_ids_in_mon_url(mon_url)
 
     fields = panel_data["targets"][0]["fields"]
     config_fields = []
     for index, port_id in enumerate(port_ids):
         field_name = fields[index + 1]["name"].split("_", maxsplit=1)[1] if (
-                    int(fields[index + 1]["jsonPath"].split('.')[-1]) == index + 1) else None
+                int(fields[index + 1]["jsonPath"].split('.')[-1]) == index + 1) else None
 
         config_fields.append({"id": int(port_id), "label": field_name})
 
@@ -69,16 +80,16 @@ def generate_config(panel_data):
     return generated_config
 
 
-def search_ids_in_mon_url(url):
+def search_port_ids_in_mon_url(url):
     parsed_url = urlparse(url)
     query_params = parse_qs(parsed_url.query)
 
     if 'id' not in query_params:
         raise ValueError("Missing id parameter in mon ports link")
 
-    id_list = query_params['id'][0].split(',')
+    port_ids = query_params['id'][0].split(',')
 
-    return id_list
+    return port_ids
 
 
 def config(grafana_url):

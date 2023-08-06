@@ -68,16 +68,29 @@ def load_and_validate_config_file(config_path):
 
 
 def get_label_from_mon_api(port_id):
-    response = requests.get(f'{MON_BASE_URL}/ports/{port_id}', verify=False, auth=MON_AUTH)
-    if response.status_code != 200:
+    try:
+        response = requests.get(f'{MON_BASE_URL}/ports/{port_id}', verify=False, auth=MON_AUTH)
+        response.raise_for_status()
+
+        port = response.json()['port']
+        port_name = response.json()['port']["entity_shortname"]
+
+    except requests.exceptions.RequestException as e:
+        print("An error occurred while making the request to mon, setting label to 'unknown': ", e)
+        return "unknown"
+    except Exception as e:
+        print("An unexpected error occurred while making the request to mon, setting label to 'unknown': ", e)
         return "unknown"
 
-    port = response.json()['port']
-    port_name = response.json()['port']["entity_shortname"]
+    try:
+        response = requests.get(f'{MON_BASE_URL}/devices/{port["device_id"]}', verify=False, auth=MON_AUTH)
+        response.raise_for_status()
 
-    response = requests.get(f'{MON_BASE_URL}/devices/{port["device_id"]}', verify=False, auth=MON_AUTH)
-
-    device_name = "unknown_device" if response.status_code != 200 else response.json()['device']["hostname"]
+        device_name = "unknown_device" if response.status_code != 200 else response.json()['device']["hostname"]
+    except requests.exceptions.RequestException as e:
+        print("An error occurred while making the request to mon, setting device part of label to 'unknown_device': ", e)
+    except Exception as e:
+        print("An unexpected error occurred while making the request to mon, setting label to 'unknown_device': ", e)
 
     return f"{device_name} - {port_name}"
 
