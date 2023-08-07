@@ -255,7 +255,7 @@ def panel():
 
     target_url = generate_mon_api_url(port_ids, initial_panel)
 
-    with open(f'generated-panel-data-{initial_panel["datasource"]["uid"]}.json', 'w') as f:
+    with open(f'{panel_file.replace("-initial-panel-data","-generated-panel-data")}.json', 'w') as f:
         initial_panel["fieldConfig"]["overrides"] = overrides
         initial_panel["targets"][0]["fields"] = fields
         initial_panel["transformations"] = transformations

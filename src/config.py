@@ -3,6 +3,7 @@ import sys
 from urllib.parse import urlparse, parse_qs
 
 import requests
+from transliterate import translit
 
 from src.consts import GRAFANA_API_TOKEN, GRAFANA_API_BASE_URL
 
@@ -68,8 +69,10 @@ def generate_config(panel_data):
 
         config_fields.append({"id": int(port_id), "label": field_name})
 
+    panel_name = translit(panel_data["title"].replace('\t', '_').replace(' ', '_'), language_code='ru', reversed=True)
+
     generated_config = {
-        "panel_file": f'initial-panel-data-{panel_data["datasource"]["uid"]}.json',
+        "panel_file": f'{panel_data["id"]}-{panel_name}-initial-panel-data.json',
         "colors": {
             "in": "GREEN",
             "out": "BLUE"
@@ -93,10 +96,9 @@ def search_port_ids_in_mon_url(url):
 
 
 def config(grafana_url):
-    dash_uid, viewPanel_uid = get_ids_from_url(grafana_url)
+    dash_uid, panel_id = get_ids_from_url(grafana_url)
     dashboard_data = get_dashboard_from_api(dash_uid)
-
-    panel_data = get_panel_from_dashboard(dashboard_data, viewPanel_uid)
+    panel_data = get_panel_from_dashboard(dashboard_data, panel_id)
     generated_config = generate_config(panel_data)
 
     with open(generated_config["panel_file"], 'w') as file:
