@@ -18,7 +18,7 @@ This script allows you to edit the Grafana panel by adding new port IDs and chan
     ```console
     pip install -r requirements.txt
     ```
-   This command will install all the required packages and their versions specified in the `requirements.txt` file.
+   This command will install all the required packages and their versions specified in the `requirements.txt` file. This command need root privileges or ```--user``` flag.
 
 ## Environment Variables
 Open the `.env` file and add the required environment variables in the format `KEY=VALUE`. Required environment variables:  
