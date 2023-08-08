@@ -3,6 +3,8 @@ import sys
 import warnings
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
 import requests
 from jsonschema import validate
 from urllib3.exceptions import InsecureRequestWarning
@@ -14,7 +16,10 @@ from src.consts import MON_BASE_URL, MON_AUTH
 warnings.filterwarnings("ignore", category=InsecureRequestWarning)
 
 
-def generate_config_schema(color_sets):
+def generate_config_schema(custom_color_sets):
+    mplt = colormaps = [m for m in cm.datad]
+
+    color_maps = custom_color_sets + mplt
     CONFIG_SCHEMA = {
         "type": "object",
         "properties": {
@@ -27,11 +32,11 @@ def generate_config_schema(color_sets):
                 "properties": {
                     "in": {
                         "type": "string",
-                        "enum": color_sets
+                        "enum": color_maps
                     },
                     "out": {
                         "type": "string",
-                        "enum": color_sets
+                        "enum": color_maps
                     }
                 },
                 "required": ["in", "out"]
@@ -117,12 +122,18 @@ def get_label_from_mon_api(port_id):
     return f"{device_name} - {port_name}"
 
 
-def parse_config(config_data):
+def parse_config(config_data, color_sets):
     in_legend, out_legend, port_ids = get_legend_from_config_fields(config_data["fields"])
     colors = config_data["colors"]
     panel_file = config_data["panel_file"]
 
-    return in_legend, out_legend, colors, port_ids, panel_file
+    in_colormap = create_custom_cmap(color_sets[colors["in"]]) if colors["in"] in list(
+        color_sets.keys()) else plt.cm.get_cmap(colors["in"])
+
+    out_colormap = create_custom_cmap(color_sets[colors["out"]]) if colors["out"] in list(
+        color_sets.keys()) else plt.cm.get_cmap(colors["out"])
+
+    return in_legend, out_legend, port_ids, panel_file, in_colormap, out_colormap
 
 
 def get_legend_from_config_fields(config_fields):
@@ -192,18 +203,14 @@ def generate_total_override(total_name):
     return total_override
 
 
-def generate_overrides(in_color_set, out_color_set, in_legend, out_legend):
+def generate_overrides(in_color_map, out_color_map, in_legend, out_legend):
     overrides = []
 
-    in_custom_cmap = create_custom_cmap(in_color_set)
-    in_colors = generate_colors(len(in_legend), in_custom_cmap)
-
+    in_colors = generate_colors(len(in_legend), in_color_map)
     for field, color in zip(in_legend, in_colors):
         overrides.append(generate_override(color, field))
 
-    out_custom_cmap = create_custom_cmap(out_color_set)
-    out_colors = generate_colors(len(out_legend), out_custom_cmap)
-
+    out_colors = generate_colors(len(out_legend), out_color_map)
     for field, color in zip(out_legend, out_colors):
         overrides.append(generate_override(color, field))
 
@@ -290,10 +297,9 @@ def panel():
     config_schema = generate_config_schema(list(color_sets.keys()))
     config_data = load_and_validate_config_file("config.json", config_schema)
 
-    in_legend, out_legend, color_sets_name, port_ids, panel_file = parse_config(config_data)
+    in_legend, out_legend, port_ids, panel_file, in_color_map, out_color_map = parse_config(config_data, color_sets)
 
-    overrides = generate_overrides(color_sets[color_sets_name["out"]], color_sets[color_sets_name["in"]], in_legend,
-                                   out_legend)
+    overrides = generate_overrides(in_color_map, out_color_map, in_legend, out_legend)
     transformations = generate_total_transformations("Total out", "Total in", in_legend, out_legend)
     fields = generate_fields(out_legend + in_legend)
 

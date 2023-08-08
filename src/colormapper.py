@@ -1,4 +1,5 @@
 import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
 
 
 def create_custom_cmap(color_set):
@@ -7,12 +8,14 @@ def create_custom_cmap(color_set):
 
 
 def generate_colors(elemets_amount, color_map):
-    cmap = color_map
+    if isinstance(color_map, str):
+        color_map = plt.cm.get_cmap(color_map)
+
     generated_colors = []
 
     for i in range(elemets_amount):
         color_index = (i + 1) / (elemets_amount + 1)
-        color = cmap(color_index)
+        color = color_map(color_index)
         hex_color = mcolors.rgb2hex(color)
         generated_colors.append(hex_color)
 
