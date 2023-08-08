@@ -2,8 +2,8 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 
 
-def create_custom_cmap(color_set):
-    cmap = mcolors.LinearSegmentedColormap.from_list('custom_cmap', color_set)
+def create_custom_cmap(color_set, colormap_name):
+    cmap = mcolors.LinearSegmentedColormap.from_list(colormap_name, color_set)
     return cmap
 
 

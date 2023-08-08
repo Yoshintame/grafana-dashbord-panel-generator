@@ -1,5 +1,4 @@
 import json
-import yaml
 import sys
 import warnings
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
@@ -7,6 +6,7 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import requests
+import yaml
 from jsonschema import validate
 from urllib3.exceptions import InsecureRequestWarning
 
@@ -88,7 +88,7 @@ def load_and_validate_config_file(config_path, config_schema):
                 print("Not valid config file. Error: ", e)
                 sys.exit(1)
     except FileNotFoundError:
-        print("File 'config.json' not found.")
+        print("File 'config.yaml' not found.")
         sys.exit(1)
 
     return config_data
@@ -124,17 +124,23 @@ def get_label_from_mon_api(port_id):
 
 
 def parse_config(config_data, color_sets):
-    in_legend, out_legend, port_ids = get_legend_from_config_fields(config_data["fields"])
+    out_legend, in_legend, port_ids = get_legend_from_config_fields(config_data["fields"])
     colors = config_data["colors"]
-    panel_file = config_data["panel_file"]
+    panel_file_path = config_data["panel_file"]
 
-    in_colormap = create_custom_cmap(color_sets[colors["in"]]) if colors["in"] in list(
+    in_colormap = create_custom_cmap(color_sets[colors["in"]], colors["in"]) if colors["in"] in list(
         color_sets.keys()) else plt.cm.get_cmap(colors["in"])
-
-    out_colormap = create_custom_cmap(color_sets[colors["out"]]) if colors["out"] in list(
+    out_colormap = create_custom_cmap(color_sets[colors["out"]], colors["out"]) if colors["out"] in list(
         color_sets.keys()) else plt.cm.get_cmap(colors["out"])
 
-    return in_legend, out_legend, port_ids, panel_file, in_colormap, out_colormap
+    return {
+        'in_legend': in_legend,
+        'out_legend': out_legend,
+        'port_ids': port_ids,
+        'panel_file_path': panel_file_path,
+        'in_colormap': in_colormap,
+        'out_colormap': out_colormap
+    }
 
 
 def get_legend_from_config_fields(config_fields):
@@ -298,18 +304,21 @@ def panel():
     config_schema = generate_config_schema(list(color_sets.keys()))
     config_data = load_and_validate_config_file("config.yaml", config_schema)
 
-    in_legend, out_legend, port_ids, panel_file, in_color_map, out_color_map = parse_config(config_data, color_sets)
+    parsed_config = parse_config(config_data, color_sets)
 
-    overrides = generate_overrides(in_color_map, out_color_map, in_legend, out_legend)
-    transformations = generate_total_transformations("Total out", "Total in", in_legend, out_legend)
-    fields = generate_fields(out_legend + in_legend)
+    overrides = generate_overrides(parsed_config["in_colormap"], parsed_config["out_colormap"],
+                                   parsed_config["in_legend"], parsed_config["out_legend"])
+    transformations = generate_total_transformations("Total out", "Total in", parsed_config["in_legend"],
+                                                     parsed_config["out_legend"])
+    fields = generate_fields(parsed_config["in_legend"] + parsed_config["out_legend"])
 
-    with open(panel_file, 'r') as f:
+    with open(parsed_config["panel_file_path"], 'r') as f:
         initial_panel = json.loads(f.read())
 
-    target_url = generate_mon_api_url(port_ids, initial_panel)
+    target_url = generate_mon_api_url(parsed_config["port_ids"], initial_panel)
 
-    with open(f'{panel_file.replace("-initial-panel-data", "-generated-panel-data")}.json', 'w') as f:
+    with open(f'{parsed_config["panel_file_path"].replace("-initial-panel-data", "-generated-panel-data")}.json',
+              'w') as f:
         initial_panel["fieldConfig"]["overrides"] = overrides
         initial_panel["targets"][0]["fields"] = fields
         initial_panel["transformations"] = transformations
