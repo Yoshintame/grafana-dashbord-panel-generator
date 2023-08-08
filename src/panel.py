@@ -1,4 +1,5 @@
 import json
+import yaml
 import sys
 import warnings
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
@@ -79,7 +80,7 @@ COLORS_SETS_SCHEMA = {
 def load_and_validate_config_file(config_path, config_schema):
     try:
         with open(config_path, 'r') as f:
-            config_data = json.loads(f.read())
+            config_data = yaml.safe_load(f)
 
             try:
                 validate(config_data, config_schema)
@@ -295,7 +296,7 @@ def load_and_validate_color_sets_file(filename):
 def panel():
     color_sets = load_and_validate_color_sets_file("src/color_sets.json")
     config_schema = generate_config_schema(list(color_sets.keys()))
-    config_data = load_and_validate_config_file("config.json", config_schema)
+    config_data = load_and_validate_config_file("config.yaml", config_schema)
 
     in_legend, out_legend, port_ids, panel_file, in_color_map, out_color_map = parse_config(config_data, color_sets)
 

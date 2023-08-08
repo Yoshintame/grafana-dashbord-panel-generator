@@ -1,4 +1,5 @@
 import json
+import yaml
 import sys
 from urllib.parse import urlparse, parse_qs
 
@@ -104,5 +105,5 @@ def config(grafana_url):
     with open(generated_config["panel_file"], 'w') as file:
         json.dump(panel_data, file, indent=4)
 
-    with open(f'config.json', 'w') as file:
-        json.dump(generated_config, file, indent=4)
+    with open(f'config.yaml', 'w') as file:
+        yaml.dump(generated_config, file)
