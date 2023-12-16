@@ -4,7 +4,7 @@ This script allows you to edit the Grafana panel by adding new port IDs and chan
 
 ## Installationf
 
-1. Make sure you have Python 3.X.X installed.
+1. Make sure you have Python 3.X.X installed.fff
 
 2. Clone the repository:
 
