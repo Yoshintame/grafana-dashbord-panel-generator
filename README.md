@@ -2,7 +2,7 @@
 
 This script allows you to edit the Grafana panel by adding new port IDs and changing their labels, generating color gradients, and total fields.
 
-## Installationf
+## Installation
 
 1. Make sure you have Python 3.X.X installed.fff
 
